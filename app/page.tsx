@@ -1,24 +1,26 @@
-import Link from 'next/link';
-import { createClient } from '@/lib/supabaseClient';
+import { getLatestArticles } from "@/lib/fetchers";
+import Link from "next/link";
 
 export default async function Home() {
-  const supabase = createClient();
-  const { data: latest } = await supabase.from('articles').select('id, title, summary, date, slug').order('date', { ascending: false }).limit(3);
-
+  const latest = await getLatestArticles(4).catch(()=>[]);
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold mb-6">오늘의 EduPod 뉴스</h1>
-      <ul>
-        {latest?.map(article => (
-          <li key={article.id} className="mb-4">
-            <Link href={`/news/${article.slug}`} className="text-blue-600 hover:underline">
-              {article.title}
-            </Link>
-            <p className="text-gray-600 text-sm">{article.summary}</p>
-          </li>
-        ))}
-      </ul>
-      <Link href="/keywords" className="inline-block mt-6 text-blue-500 font-medium">키워드별 학습 보기 →</Link>
+    <div className="grid">
+      <div className="card">
+        <h1 style={{marginTop:0}}>오늘의 EduPod</h1>
+        <p className="meta">동적 구조로 전환된 홈 화면</p>
+      </div>
+      <div className="card">
+        <h2 style={{marginTop:0}}>최신 뉴스</h2>
+        <ul>
+          {latest.map(a => (
+            <li key={a.id}>
+              <Link href={`/news/${a.slug}`}>{a.title}</Link>
+              <span className="meta"> — {a.date}</span>
+            </li>
+          ))}
+        </ul>
+        <div style={{marginTop:12}}><Link href="/news">뉴스 더 보기 →</Link></div>
+      </div>
     </div>
   );
 }
